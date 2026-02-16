@@ -1,11 +1,31 @@
 pipeline {
-    agent any
+  agent any
 
-    stages {
-        stage('Build') {
-            steps {
-                echo 'Hello World, This is my first pipeline job'
-            }
-        }
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
     }
+
+    stage('Build') {
+      steps {
+        sh 'mvn -B clean compile'
+      }
+    }
+
+    stage('Test') {
+      steps {
+        sh 'mvn -B test'
+      }
+    }
+  }
+
+  post {
+    always {
+      junit 'target/surefire-reports/*.xml'
+      archiveArtifacts artifacts: 'target/surefire-reports/**', fingerprint: true
+    }
+  }
 }
+
